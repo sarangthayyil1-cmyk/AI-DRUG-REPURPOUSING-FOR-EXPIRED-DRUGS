@@ -29,7 +29,14 @@ export async function POST(req: NextRequest) {
     } = body;
 
     // Use API key from body if provided, otherwise fall back to environment variable
-    const finalApiKey = apiKey || process.env.ANTHROPIC_API_KEY;
+    const finalApiKey = (apiKey || process.env.ANTHROPIC_API_KEY)?.trim();
+
+    // DEBUG: Log if key is found (do not log the full key for security)
+    if (!finalApiKey) {
+      console.log("ANTHROPIC_API_KEY not found in session or environment");
+    } else {
+      console.log("ANTHROPIC_API_KEY loaded successfully (starts with:", finalApiKey.substring(0, 10), ")");
+    }
 
     // Validate API key
     if (!finalApiKey?.startsWith("sk-ant-")) {
@@ -51,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     // Call Claude API
     const message = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 2000,
       system: buildSystemPrompt(),
       messages: [

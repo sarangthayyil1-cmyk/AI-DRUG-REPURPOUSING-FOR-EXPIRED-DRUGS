@@ -1,22 +1,19 @@
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 /**
  * Client-side Supabase client for use in browser components.
+ * Replaces createClientComponentClient with createBrowserClient from @supabase/ssr.
  */
-export const supabase = createClientComponentClient();
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-/**
- * Server-side Supabase client (used for API routes or server components).
- * Remember that environment variables are only accessible if configured correctly.
- */
-export const getSupabaseServerClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+if (!supabaseUrl || !supabaseKey) {
+  console.warn(
+    "Supabase environment variables are missing. Please check your .env.local file and restart your development server (Ctrl+C, then npm run dev)."
+  );
+}
 
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Supabase environment variables are missing.");
-  }
-
-  return createClient(supabaseUrl, supabaseKey);
-};
+export const supabase = createBrowserClient(
+  supabaseUrl || "https://placeholder.supabase.co",
+  supabaseKey || "placeholder-key"
+);

@@ -48,11 +48,6 @@ export default function DiscoverySuggestions({
   const [activeTab, setActiveTab] = useState<TabKey>("analogs");
 
   const handleGenerate = async () => {
-    if (!apiKey) {
-      setError("Please enter your Anthropic API key on the analysis page.");
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
@@ -60,6 +55,7 @@ export default function DiscoverySuggestions({
       const res = await fetch("/api/discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        // apiKey is now optional as the server will check process.env.ANTHROPIC_API_KEY
         body: JSON.stringify({ apiKey, drugName, smiles, stabilityResult }),
       });
 
@@ -142,14 +138,6 @@ export default function DiscoverySuggestions({
             Retry
           </button>
         </div>
-      )}
-
-      {/* No API key hint */}
-      {!discovery && !isLoading && !error && !apiKey && (
-        <p className="text-sm text-gray-400 text-center py-6">
-          Enter your Anthropic API key on the analysis page to enable
-          AI-powered drug discovery suggestions.
-        </p>
       )}
 
       {/* Results with tabs */}

@@ -168,11 +168,13 @@ export default function AnalysisForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* API Key input */}
+      {/* API Key input - Removed for security as it is now handled via .env.local */}
+      {/* 
       <ApiKeyInput
         value={form.apiKey}
         onChange={(v) => update("apiKey", v)}
-      />
+      /> 
+      */}
 
       {/* Page title */}
       <div className="px-1">
