@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FlaskConical, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 import ApiKeyInput from "./ApiKeyInput";
 import DrugIdentification from "./DrugIdentification";
 import StabilityClassSelector from "./StabilityClassSelector";
@@ -113,6 +114,34 @@ export default function AnalysisForm() {
       }
 
       const result = await analyzeRes.json();
+
+      // NEW: Persist to Supabase if user is logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { error: dbError } = await supabase.from("analyses").insert({
+          user_id: session.user.id,
+          drug_name: form.drugName,
+          smiles: form.smiles,
+          input_data: {
+            stabilityClass: form.stabilityClass,
+            formulation: form.formulation,
+            expiryDate: form.expiryDate,
+            manufacturingDate: form.manufacturingDate,
+            storageTemp: form.storageTemp,
+            storageHumidity: form.storageHumidity,
+            lightExposure: form.lightExposure,
+            containerIntegrity: form.containerIntegrity,
+            strength: form.strength,
+            manufacturer: form.manufacturer,
+            notes: form.notes,
+          },
+          result_data: result,
+        });
+
+        if (dbError) {
+          console.error("Error saving analysis to history:", dbError.message);
+        }
+      }
 
       // Store result + form data in sessionStorage for the results page
       sessionStorage.setItem(

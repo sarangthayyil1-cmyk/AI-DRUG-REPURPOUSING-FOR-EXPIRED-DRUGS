@@ -28,8 +28,11 @@ export async function POST(req: NextRequest) {
       stabilityResult: StabilityResult;
     } = body;
 
+    // Use API key from body if provided, otherwise fall back to environment variable
+    const finalApiKey = apiKey || process.env.ANTHROPIC_API_KEY;
+
     // Validate API key
-    if (!apiKey?.startsWith("sk-ant-")) {
+    if (!finalApiKey?.startsWith("sk-ant-")) {
       return NextResponse.json(
         { error: "Valid Anthropic API key is required (starts with sk-ant-)" },
         { status: 400 }
@@ -43,8 +46,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create Anthropic client with the user's API key
-    const client = new Anthropic({ apiKey });
+    // Create Anthropic client
+    const client = new Anthropic({ apiKey: finalApiKey });
 
     // Call Claude API
     const message = await client.messages.create({
