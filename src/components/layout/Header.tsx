@@ -2,7 +2,6 @@
 
 import { History, LogOut, PlusCircle } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
