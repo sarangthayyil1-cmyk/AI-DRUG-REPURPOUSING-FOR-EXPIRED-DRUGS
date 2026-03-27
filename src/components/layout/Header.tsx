@@ -41,7 +41,7 @@ export default function Header() {
           <img 
             src="/logo.png" 
             alt="PharmStable Icon" 
-            className="absolute top-1/2 left-1/2 transform -translate-x-[75%] -translate-y-[52%] h-[160%] w-auto max-w-none"
+            className="absolute top-1/2 left-[-10%] transform -translate-y-1/2 h-[160%] w-auto max-w-none"
           />
         </div>
         <span className="text-lg font-bold tracking-tight">PharmStable</span>
