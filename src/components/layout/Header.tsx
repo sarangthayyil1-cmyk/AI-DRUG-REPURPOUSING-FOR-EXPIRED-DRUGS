@@ -33,15 +33,12 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-[#1A1A2E] text-white px-6 py-4 flex items-center justify-between shadow-lg sticky top-0 z-50">
-      <Link href="/analyze" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <div className="w-10 h-10 rounded-lg bg-brand flex items-center justify-center">
+    <header className="bg-brand text-white px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-50">
+      <Link href="/analyze" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+        <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
           <FlaskConical className="w-5 h-5 text-white" />
         </div>
         <span className="text-lg font-bold tracking-tight">PharmStable</span>
-        <span className="text-xs font-semibold bg-brand/20 text-brand px-2 py-0.5 rounded-md">
-          v0.1
-        </span>
       </Link>
 
       <nav className="flex items-center gap-6">
@@ -49,21 +46,21 @@ export default function Header() {
           <>
             <Link 
               href="/analyze" 
-              className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-colors"
             >
               <PlusCircle className="w-4 h-4" />
               Analyze
             </Link>
             <Link 
               href="/history" 
-              className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-colors"
             >
               <History className="w-4 h-4" />
               History
             </Link>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-red-400 transition-colors ml-4 pl-4 border-l border-gray-700"
+              className="flex items-center gap-2 text-sm font-medium text-white/90 hover:text-red-200 transition-colors ml-4 pl-4 border-l border-white/20"
             >
               <LogOut className="w-4 h-4" />
               Sign Out
@@ -72,7 +69,7 @@ export default function Header() {
         ) : (
           <Link 
             href="/login" 
-            className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+            className="text-sm font-medium text-white/90 hover:text-white transition-colors"
           >
             Login
           </Link>

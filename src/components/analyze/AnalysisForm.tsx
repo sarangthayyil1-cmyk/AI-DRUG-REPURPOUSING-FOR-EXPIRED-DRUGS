@@ -178,7 +178,7 @@ export default function AnalysisForm() {
 
       {/* Page title */}
       <div className="px-1">
-        <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
           Drug Stability
           <br />
           <span className="text-brand">Analysis System</span>

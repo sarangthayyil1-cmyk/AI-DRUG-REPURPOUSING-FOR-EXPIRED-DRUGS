@@ -1,13 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 /* ── Custom design tokens ── */
 @theme {
-  --color-brand: #2D9F6F;
-  --color-brand-dark: #247F59;
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-brand: #1D7442;
+  --color-brand-dark: #145831;
   --color-brand-light: #E8F5EE;
 
-  --color-cream: #FDF8F0;
-  --color-cream-dark: #F5EDE0;
+  --color-cream: #FFFFFF;
+  --color-cream-dark: #F9FAFB;
 
   --color-status-active: #22C55E;
   --color-status-degraded: #F59E0B;
@@ -17,7 +21,7 @@
 /* ── Base styles ── */
 body {
   background-color: var(--color-cream);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* ── Section number badge ── */
@@ -37,10 +41,9 @@ body {
 
 /* ── Card container used for each form section ── */
 .card-section {
-  background: white;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: transparent;
+  padding: 2.5rem 0;
+  /* Removed box-shadow and border-radius for minimal layout */
 }
 
 /* ── Custom range slider styling ── */
@@ -94,7 +97,7 @@ input[type="range"]::-moz-range-thumb {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   font-size: 0.95rem;
   color: #1f2937;
   background-color: white;
@@ -104,7 +107,7 @@ input[type="range"]::-moz-range-thumb {
 .form-input:focus {
   outline: none;
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px var(--color-brand-light);
+  box-shadow: 0 0 0 2px var(--color-brand-light);
 }
 
 .form-input::placeholder {
@@ -116,7 +119,7 @@ input[type="range"]::-moz-range-thumb {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   font-size: 0.95rem;
   color: #1f2937;
   background-color: white;
@@ -127,5 +130,5 @@ input[type="range"]::-moz-range-thumb {
 .form-select:focus {
   outline: none;
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px var(--color-brand-light);
+  box-shadow: 0 0 0 2px var(--color-brand-light);
 }
