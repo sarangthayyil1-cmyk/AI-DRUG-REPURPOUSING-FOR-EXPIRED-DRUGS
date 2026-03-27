@@ -36,9 +36,11 @@ export default function Header() {
   return (
     <header className="bg-brand text-white px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-50">
       <Link href="/analyze" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white overflow-hidden">
-          <Image src="/logo.png" alt="PharmStable Logo" width={40} height={40} className="object-contain" />
-        </div>
+        <img 
+          src="/logo.png" 
+          alt="PharmStable Logo" 
+          className="w-10 h-10 object-contain rounded-lg"
+        />
         <span className="text-lg font-bold tracking-tight">PharmStable</span>
       </Link>
 
