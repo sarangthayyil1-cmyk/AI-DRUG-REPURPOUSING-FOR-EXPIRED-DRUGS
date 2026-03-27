@@ -36,11 +36,14 @@ export default function Header() {
   return (
     <header className="bg-brand text-white px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-50">
       <Link href="/analyze" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-        <img 
-          src="/logo.png" 
-          alt="PharmStable Logo" 
-          className="w-10 h-10 object-contain rounded-lg"
-        />
+        {/* Container to act as a 40x40 window, cropping out the right-side text of the logo image */}
+        <div className="w-10 h-10 rounded-lg bg-white overflow-hidden relative flex-shrink-0">
+          <img 
+            src="/logo.png" 
+            alt="PharmStable Icon" 
+            className="absolute top-1/2 left-1/2 transform -translate-x-[75%] -translate-y-[52%] h-[160%] w-auto max-w-none"
+          />
+        </div>
         <span className="text-lg font-bold tracking-tight">PharmStable</span>
       </Link>
 
