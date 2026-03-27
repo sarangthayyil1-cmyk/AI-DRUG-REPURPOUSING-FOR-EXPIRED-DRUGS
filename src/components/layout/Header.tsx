@@ -36,14 +36,17 @@ export default function Header() {
   return (
     <header className="bg-brand text-white px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-50">
       <Link href="/analyze" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-        {/* Container to act as a 40x40 window, cropping out the right-side text of the logo image */}
-        <div className="w-10 h-10 rounded-lg bg-white overflow-hidden relative flex-shrink-0">
-          <img 
-            src="/logo.png" 
-            alt="PharmStable Icon" 
-            className="absolute top-1/2 left-[-10%] transform -translate-y-1/2 h-[160%] w-auto max-w-none"
-          />
-        </div>
+        {/* Container to act as a 40x40 window, cropping the logo to show only the icon */}
+        <div 
+          className="w-10 h-10 rounded-lg flex-shrink-0"
+          style={{
+            backgroundImage: "url('/logo.png')",
+            backgroundSize: "250% auto",
+            backgroundPosition: "0% 48%",
+            backgroundRepeat: "no-repeat"
+          }}
+          aria-label="PharmStable Icon"
+        />
         <span className="text-lg font-bold tracking-tight">PharmStable</span>
       </Link>
 
