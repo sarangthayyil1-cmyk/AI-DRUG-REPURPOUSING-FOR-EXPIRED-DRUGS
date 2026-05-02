@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#1D7442" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Hexagonal benzene rings arranged in a triangle (molecular structure) -->
+  <!-- Bottom-left ring -->
+  <polygon points="30,80 22,66 30,52 46,52 54,66 46,80" />
+  <!-- Bottom-right ring -->
+  <polygon points="74,80 66,66 74,52 90,52 98,66 90,80" />
+  <!-- Top ring -->
+  <polygon points="52,46 44,32 52,18 68,18 76,32 68,46" />
+  <!-- Bonds between rings -->
+  <line x1="46" y1="52" x2="52" y2="46" />
+  <line x1="68" y1="46" x2="74" y2="52" />
+  <line x1="54" y1="66" x2="66" y2="66" />
+  <!-- Flask / atom node top-right -->
+  <circle cx="98" cy="22" r="8" fill="#1D7442" stroke="none" />
+  <line x1="76" y1="32" x2="92" y2="26" />
+  <!-- Small accent dot for double-bond style indicator -->
+  <circle cx="60" cy="32" r="2.5" fill="#1D7442" stroke="none" />
+  <circle cx="38" cy="66" r="2.5" fill="#1D7442" stroke="none" />
+  <circle cx="82" cy="66" r="2.5" fill="#1D7442" stroke="none" />
+  <!-- Baseline (lab bench) -->
+  <line x1="14" y1="100" x2="106" y2="100" stroke-width="5" />
+</svg>

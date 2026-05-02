@@ -2,14 +2,14 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Middleware for Next.js to refresh Supabase sessions and handle protected routes.
- * Using @supabase/ssr for modern Next.js compatibility.
+ * Middleware:
+ *   - Refreshes the Supabase session cookie on every request.
+ *   - Redirects unauthenticated users away from protected app pages.
+ *   - Redirects already-authenticated users away from /login and /signup.
  */
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   });
 
   const supabase = createServerClient(
@@ -21,38 +21,18 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
+          request.cookies.set({ name, value, ...options });
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
+          response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
+          request.cookies.set({ name, value: "", ...options });
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           });
-          response.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
     }
@@ -62,15 +42,23 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Protected routes: redirect to login if no session
-  const protectedRoutes = ["/results", "/history"];
-  const isProtectedRoute = protectedRoutes.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
+  const pathname = request.nextUrl.pathname;
+
+  const protectedRoutes = ["/analyze", "/results", "/history"];
+  const isProtectedRoute = protectedRoutes.some((p) => pathname.startsWith(p));
+
+  const authRoutes = ["/login", "/signup"];
+  const isAuthRoute = authRoutes.some((p) => pathname === p);
 
   if (isProtectedRoute && !session) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  if (isAuthRoute && session) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/analyze";
     return NextResponse.redirect(url);
   }
 
