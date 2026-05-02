@@ -201,20 +201,6 @@ Vercel project settings.
 A GitHub Actions keepalive workflow pings the Supabase project on a
 schedule to prevent the free-tier instance from being paused for inactivity.
 
-## 🚀 Roadmap
-
-PharmStable is actively evolving. Upcoming improvements include:
-
-- RDKit integration for molecular property calculations
-- Arrhenius kinetics for temperature-dependent degradation modelling
-- ML-based stability prediction trained on historical pharmaceutical data
-- 2D / 3D molecular structure visualisation
-- Shareable, signed result links
-- Bulk CSV import for stockpile audits (NGOs, pharmacies, hospitals)
-- Expanded EMA / FDA brand-name coverage
-
-Feedback and iteration are ongoing.
-
 ## Disclaimer
 
 This tool provides heuristic estimates for research and educational
