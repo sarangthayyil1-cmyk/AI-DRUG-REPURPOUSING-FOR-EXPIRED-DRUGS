@@ -16,27 +16,38 @@ export function searchDrugs(query: string, limit = 8): WHODrug[] {
 
   // Score each drug based on how well it matches
   const scored = WHO_DRUGS.map((drug) => {
-    const name = drug.name.toLowerCase();
-    let score = 0;
+    let bestScore = 0;
+    
+    // Include the main name and any synonyms for matching
+    const searchNames = [drug.name, ...(drug.synonyms || [])];
 
-    if (name === lower) {
-      score = 1000; // Exact match
-    } else if (name.startsWith(lower)) {
-      score = 500 - name.length; // Shorter names rank higher
-    } else if (name.includes(lower)) {
-      score = 200 - name.indexOf(lower); // Earlier position ranks higher
-    } else {
-      // Check individual words
-      const words = name.split(/[\s(),-]+/);
-      for (const word of words) {
-        if (word.startsWith(lower)) {
-          score = 100;
-          break;
+    for (const nameObj of searchNames) {
+      const name = nameObj.toLowerCase();
+      let score = 0;
+
+      if (name === lower) {
+        score = 1000; // Exact match
+      } else if (name.startsWith(lower)) {
+        score = 500 - name.length; // Shorter names rank higher
+      } else if (name.includes(lower)) {
+        score = 200 - name.indexOf(lower); // Earlier position ranks higher
+      } else {
+        // Check individual words
+        const words = name.split(/[\s(),-]+/);
+        for (const word of words) {
+          if (word.startsWith(lower)) {
+            score = 100;
+            break;
+          }
         }
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
       }
     }
 
-    return { drug, score };
+    return { drug, score: bestScore };
   })
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score)

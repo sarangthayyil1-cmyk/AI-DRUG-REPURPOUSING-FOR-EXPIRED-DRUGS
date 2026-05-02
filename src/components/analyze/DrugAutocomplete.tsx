@@ -69,6 +69,11 @@ export default function DrugAutocomplete({
             >
               <div className="font-medium text-gray-900 text-sm">
                 {drug.name}
+                {drug.synonyms && drug.synonyms.length > 0 && (
+                  <span className="text-gray-400 text-xs ml-2 font-normal">
+                    (e.g., {drug.synonyms.join(", ")})
+                  </span>
+                )}
               </div>
               <div className="text-xs text-gray-500 mt-0.5">
                 {drug.category} · Class {drug.defaultStabilityClass}
