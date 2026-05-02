@@ -98,7 +98,6 @@ export interface DiscoveryResponse {
 
 /** Form state for the analysis page */
 export interface AnalysisFormState {
-  apiKey: string;
   drugName: string;
   smiles: string;
   formulation: FormulationType | "";

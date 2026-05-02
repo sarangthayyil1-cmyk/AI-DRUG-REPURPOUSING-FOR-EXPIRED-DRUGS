@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import StabilityResult from "@/components/results/StabilityResult";
 import FactorBreakdown from "@/components/results/FactorBreakdown";
@@ -17,8 +17,9 @@ interface StoredAnalysis {
     smiles: string;
     formulation: string;
     stabilityClass: number;
-    apiKey: string;
   };
+  saveStatus?: "saved" | "skipped" | "failed";
+  saveWarning?: string | null;
 }
 
 /**
@@ -80,6 +81,29 @@ export default function ResultsPage() {
           </p>
         </div>
 
+        {/* Save status banner */}
+        {data.saveStatus === "saved" && (
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 px-4 py-2.5 rounded-xl text-sm">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            Saved to your history.
+          </div>
+        )}
+        {data.saveStatus === "failed" && data.saveWarning && (
+          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2.5 rounded-xl text-sm">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div>
+              <strong>{data.saveWarning}</strong>
+              <p className="text-amber-700/80 mt-1">
+                The analysis ran successfully, but it could not be saved to
+                your history. Open the browser console for details, or run the
+                Supabase setup SQL to make sure the <code>profiles</code> and{" "}
+                <code>analyses</code> tables (and the{" "}
+                <code>handle_new_user</code> trigger) are in place.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Stability result card with gauge */}
         <StabilityResult
           result={data.result}
@@ -94,7 +118,6 @@ export default function ResultsPage() {
           drugName={data.formData.drugName}
           smiles={data.formData.smiles}
           stabilityResult={data.result}
-          apiKey={data.formData.apiKey}
         />
 
         {/* Disclaimer */}
@@ -104,14 +127,6 @@ export default function ResultsPage() {
           clinically validated and should not be used as the basis for
           medical decisions. Always consult a qualified pharmacist or
           physician before using any medication past its labeled expiry date.
-        </div>
-
-        {/* Future integration note */}
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-500 leading-relaxed">
-          <strong>Future enhancements:</strong> Integration with RDKit for
-          molecular property calculations, Arrhenius kinetics for
-          temperature-dependent degradation modeling, and ML-based stability
-          prediction using historical pharmaceutical data.
         </div>
       </main>
     </div>

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FlaskConical, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import ApiKeyInput from "./ApiKeyInput";
 import DrugIdentification from "./DrugIdentification";
 import StabilityClassSelector from "./StabilityClassSelector";
 import ExpiryAgeSection from "./ExpiryAgeSection";
@@ -20,7 +19,6 @@ import type {
 
 /** Default form values */
 const INITIAL_STATE: AnalysisFormState = {
-  apiKey: "",
   drugName: "",
   smiles: "",
   formulation: "",
@@ -44,6 +42,7 @@ export default function AnalysisForm() {
   const [form, setForm] = useState<AnalysisFormState>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
   const router = useRouter();
 
   // Helper to update a single field
@@ -69,6 +68,7 @@ export default function AnalysisForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSaveWarning(null);
 
     // Validate required fields
     if (!form.drugName.trim()) {
@@ -108,42 +108,134 @@ export default function AnalysisForm() {
         }),
       });
 
+      if (analyzeRes.status === 429) {
+        const retryAfter = analyzeRes.headers.get("Retry-After");
+        throw new Error(
+          `Too many analyses. Please wait ${retryAfter ?? "a few"} seconds and try again.`
+        );
+      }
+
       if (!analyzeRes.ok) {
-        const errData = await analyzeRes.json();
+        const errData = await analyzeRes.json().catch(() => ({}));
         throw new Error(errData.error || "Analysis failed");
       }
 
       const result = await analyzeRes.json();
 
-      // NEW: Persist to Supabase if user is logged in
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { error: dbError } = await supabase.from("analyses").insert({
-          user_id: session.user.id,
-          drug_name: form.drugName,
-          smiles: form.smiles,
-          input_data: {
-            stabilityClass: form.stabilityClass,
-            formulation: form.formulation,
-            expiryDate: form.expiryDate,
-            manufacturingDate: form.manufacturingDate,
-            storageTemp: form.storageTemp,
-            storageHumidity: form.storageHumidity,
-            lightExposure: form.lightExposure,
-            containerIntegrity: form.containerIntegrity,
-            strength: form.strength,
-            manufacturer: form.manufacturer,
-            notes: form.notes,
-          },
-          result_data: result,
-        });
+      // Persist to Supabase if user is logged in.
+      // Wrapped in its own try so a save failure never blocks navigation
+      // to the results page.
+      let saveStatus: "saved" | "skipped" | "failed" = "skipped";
+      let saveErrorMsg: string | null = null;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const session = sessionData?.session;
 
-        if (dbError) {
-          console.error("Error saving analysis to history:", dbError.message);
+        if (session?.user) {
+          const payload = {
+            user_id: session.user.id,
+            drug_name: form.drugName,
+            smiles: form.smiles,
+            input_data: {
+              stabilityClass: form.stabilityClass,
+              formulation: form.formulation,
+              expiryDate: form.expiryDate,
+              manufacturingDate: form.manufacturingDate,
+              storageTemp: form.storageTemp,
+              storageHumidity: form.storageHumidity,
+              lightExposure: form.lightExposure,
+              containerIntegrity: form.containerIntegrity,
+              strength: form.strength,
+              manufacturer: form.manufacturer,
+              notes: form.notes,
+            },
+            result_data: result,
+          };
+
+          // First attempt
+          let { error: insertErr } = await supabase
+            .from("analyses")
+            .insert(payload);
+
+          // If the insert failed because the profiles FK had no matching row
+          // (PostgreSQL error code 23503 — foreign_key_violation), try to
+          // create the profile row and retry once. We now also check the
+          // upsert's own error — previously a silently-failing upsert (e.g.
+          // RLS denied) made it look like the retry didn't help.
+          if (insertErr && (insertErr as any).code === "23503") {
+            const { error: profileErr } = await supabase
+              .from("profiles")
+              .upsert(
+                { id: session.user.id, email: session.user.email ?? null },
+                { onConflict: "id" }
+              );
+
+            if (profileErr) {
+              console.error(
+                "Could not create missing profile row:",
+                profileErr
+              );
+              const pcode = (profileErr as any).code
+                ? ` [${(profileErr as any).code}]`
+                : "";
+              saveStatus = "failed";
+              saveErrorMsg =
+                `Could not save to history. The analyses table requires a row in profiles, ` +
+                `and creating that row also failed${pcode}: ${profileErr.message}. ` +
+                `Run supabase_fix_history.sql in the Supabase SQL editor to repoint the ` +
+                `foreign key to auth.users.`;
+              setSaveWarning(saveErrorMsg);
+            } else {
+              const retry = await supabase.from("analyses").insert(payload);
+              insertErr = retry.error;
+
+              if (insertErr) {
+                console.error(
+                  "Error saving analysis to history (after profile upsert):",
+                  insertErr,
+                  "payload:",
+                  payload
+                );
+                saveStatus = "failed";
+                const code = (insertErr as any).code
+                  ? ` [${(insertErr as any).code}]`
+                  : "";
+                saveErrorMsg = `Could not save to history${code}: ${insertErr.message}`;
+                setSaveWarning(saveErrorMsg);
+              } else {
+                saveStatus = "saved";
+              }
+            }
+          } else if (insertErr) {
+            console.error(
+              "Error saving analysis to history:",
+              insertErr,
+              "payload:",
+              payload
+            );
+            saveStatus = "failed";
+            const code = (insertErr as any).code
+              ? ` [${(insertErr as any).code}]`
+              : "";
+            saveErrorMsg = `Could not save to history${code}: ${insertErr.message}`;
+            setSaveWarning(saveErrorMsg);
+          } else {
+            saveStatus = "saved";
+          }
         }
+      } catch (saveErr) {
+        console.error("Unexpected error while saving to history:", saveErr);
+        saveStatus = "failed";
+        saveErrorMsg =
+          saveErr instanceof Error
+            ? `Could not save to history: ${saveErr.message}`
+            : "Could not save to history (unknown error).";
+        setSaveWarning(saveErrorMsg);
       }
 
-      // Store result + form data in sessionStorage for the results page
+      // Store result + form data in sessionStorage for the results page.
+      // saveStatus / saveWarning are passed along so the results page can
+      // display whether the analysis was saved to history.
       sessionStorage.setItem(
         "analysisResult",
         JSON.stringify({
@@ -153,8 +245,9 @@ export default function AnalysisForm() {
             smiles: form.smiles,
             formulation: form.formulation,
             stabilityClass: form.stabilityClass || 3,
-            apiKey: form.apiKey, // For Claude API calls on results page
           },
+          saveStatus,
+          saveWarning: saveErrorMsg,
         })
       );
 
@@ -238,6 +331,13 @@ export default function AnalysisForm() {
       {error && (
         <div className="bg-red-50 text-red-700 px-4 py-3 rounded-xl text-sm">
           {error}
+        </div>
+      )}
+
+      {/* Non-blocking save warning */}
+      {saveWarning && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm">
+          {saveWarning}
         </div>
       )}
 

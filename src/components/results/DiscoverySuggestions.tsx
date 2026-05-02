@@ -19,7 +19,6 @@ interface DiscoverySuggestionsProps {
   drugName: string;
   smiles: string;
   stabilityResult: StabilityResult;
-  apiKey: string;
 }
 
 type TabKey = "analogs" | "modifications" | "relatedDrugs" | "repurposing";
@@ -33,14 +32,13 @@ const TABS: { key: TabKey; label: string; icon: typeof Beaker }[] = [
 
 /**
  * AI-powered drug discovery suggestions panel.
- * Calls the /api/discover endpoint with the user's Anthropic API key.
- * Displays suggestions in tabbed categories.
+ * Calls the auth-gated /api/discover endpoint and displays Claude's
+ * suggestions in tabbed categories.
  */
 export default function DiscoverySuggestions({
   drugName,
   smiles,
   stabilityResult,
-  apiKey,
 }: DiscoverySuggestionsProps) {
   const [discovery, setDiscovery] = useState<DiscoveryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,12 +53,18 @@ export default function DiscoverySuggestions({
       const res = await fetch("/api/discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // apiKey is now optional as the server will check process.env.ANTHROPIC_API_KEY
-        body: JSON.stringify({ apiKey, drugName, smiles, stabilityResult }),
+        body: JSON.stringify({ drugName, smiles, stabilityResult }),
       });
 
+      if (res.status === 429) {
+        const retryAfter = res.headers.get("Retry-After");
+        throw new Error(
+          `Too many AI requests. Try again in ${retryAfter ?? "a few"} seconds.`
+        );
+      }
+
       if (!res.ok) {
-        const errData = await res.json();
+        const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || "Failed to generate suggestions");
       }
 
