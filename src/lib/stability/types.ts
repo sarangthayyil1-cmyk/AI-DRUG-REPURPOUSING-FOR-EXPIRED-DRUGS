@@ -69,9 +69,10 @@ export interface StabilityResult {
   monthsSinceExpiry: number;
 }
 
-/** Drug entry in the WHO dataset */
+/** Drug entry in the WHO/EMA dataset */
 export interface WHODrug {
   name: string;
+  synonyms?: string[];
   smiles: string;
   category: string;
   defaultStabilityClass: StabilityClass;
