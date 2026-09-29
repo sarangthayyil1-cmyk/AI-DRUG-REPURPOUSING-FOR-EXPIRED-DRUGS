@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/supabase/authErrorMessage";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -39,7 +40,7 @@ export default function SignupPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(authErrorMessage(error));
       setLoading(false);
       return;
     }

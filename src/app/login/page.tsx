@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/supabase/authErrorMessage";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,7 +25,7 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(authErrorMessage(error));
       setLoading(false);
     } else {
       router.push("/analyze");

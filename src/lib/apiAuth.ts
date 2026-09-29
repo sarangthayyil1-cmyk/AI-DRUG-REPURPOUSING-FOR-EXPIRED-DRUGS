@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { withTimeout } from "@/lib/supabase/withTimeout";
 
 /**
  * Resolve the current Supabase session inside a Next.js API route.
@@ -23,8 +24,9 @@ export async function getAuthedUserId(): Promise<string | null> {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user?.id ?? null;
+  return withTimeout(
+    supabase.auth.getUser().then(({ data }) => data.user?.id ?? null),
+    3000,
+    null
+  );
 }

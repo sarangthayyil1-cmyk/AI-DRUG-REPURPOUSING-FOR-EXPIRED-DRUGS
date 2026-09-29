@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { withTimeout } from "@/lib/supabase/withTimeout";
 
 /**
  * Middleware:
@@ -38,9 +39,13 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // If Supabase is unreachable, treat the visitor as signed out rather than
+  // stalling the page while the SDK retries the token refresh.
+  const session = await withTimeout(
+    supabase.auth.getSession().then(({ data }) => data.session),
+    3000,
+    null
+  );
 
   const pathname = request.nextUrl.pathname;
 
@@ -66,5 +71,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
 };
